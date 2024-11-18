@@ -37,7 +37,7 @@ func handleClient(conn net.Conn) {
 		input := make([]byte, (1024 * 4))
 		n, err := conn.Read(input)
 		if n == 0 || err != nil {
-			fmt.Println("Read error:", err)
+			fmt.Println("ошибка:", err)
 			break
 		}
 		source := string(input[0:n])

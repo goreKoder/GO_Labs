@@ -24,3 +24,4 @@ func main() {
 }
 
 //		go run GO_7Laba/zad_2/main.go
+//		go run zad_2/main.go
