@@ -14,13 +14,15 @@ func main() {
 	defer conn.Close()
 
 	fmt.Println("подрубился по TCP емае")
-
-	message := "Hello, server!"
+	message := "здарова"
+	fmt.Scan(&message)
 	_, err = conn.Write([]byte(message))
 	if err != nil {
 		fmt.Println("Error sending data:", err.Error())
 		return
 	}
+	fmt.Println("Отправили сообщение")
+
 }
 
 //		go run GO_7Laba/zad_2/main.go

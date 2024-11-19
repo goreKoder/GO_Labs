@@ -3,6 +3,7 @@ package main //      go run GO_7Laba/zad_1/main.go
 import (
 	"fmt"
 	"net"
+	"time"
 )
 
 func main() {
@@ -18,32 +19,32 @@ func main() {
 	for { //цикл бесконечностей емае
 		conn, err := listener.Accept() // принимаю новых клиентов (вроде)
 		if err != nil {
-			fmt.Println("Error accepting connection:", err.Error())
+			fmt.Println("Ошибка при приеме соединения:", err.Error())
 			return
 		}
-
-		go handleClient(conn) //горутина чтобы чуть что всех закрыть нафиг
+		go handleClient(conn)
+		conn.SetDeadline(time.Now().Add(time.Second * 10))
 	}
 }
 
 func handleClient(conn net.Conn) {
 	defer conn.Close()
-
 	clientAddr := conn.RemoteAddr().String() //Я получил твой аднес, АХАХАХААХХАХАХАХАХАХХАХАХ!
 	fmt.Println("Адрес клиента:", clientAddr)
-
 	for {
 		// считываем полученные в запросе данные
 		input := make([]byte, (1024 * 4))
-		n, err := conn.Read(input)
-		if n == 0 || err != nil {
+		_, err := conn.Read(input)
+		if err != nil {
 			fmt.Println("ошибка:", err)
 			break
 		}
-		source := string(input[0:n])
+
+		source := string(input)
 		fmt.Println("Сообщение от клиента: ", source)
+
 	}
-	// fmt.Println("Client disconnected:", clientAddr)
+
 }
 
 //      go run GO_7Laba/zad_1/main.go
