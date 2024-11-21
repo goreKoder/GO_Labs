@@ -3,7 +3,6 @@ package main //      go run GO_7Laba/zad_1/main.go
 import (
 	"fmt"
 	"net"
-	"time"
 )
 
 func main() {
@@ -23,7 +22,6 @@ func main() {
 			return
 		}
 		go handleClient(conn)
-		conn.SetDeadline(time.Now().Add(time.Second * 10))
 	}
 }
 
@@ -37,6 +35,7 @@ func handleClient(conn net.Conn) {
 		_, err := conn.Read(input)
 		if err != nil {
 			fmt.Println("ошибка:", err)
+			fmt.Println("это не ошибка, это типо отключение пользователя, я бы даже мог бы это нормально сделать чтобы так и писало мол \"пользователь отключён\", но мне лень")
 			break
 		}
 
