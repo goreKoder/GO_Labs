@@ -89,3 +89,4 @@ func main() {
 //				go mod init github.com/gorilla/websocket
 //				go get github.com/gorilla/websocket
 //				go get -u github.com/gorilla/websocket
+//		go run main.go
