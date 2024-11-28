@@ -6,14 +6,9 @@ import (
 )
 
 func main() {
-	// var intCh chan int
 	intCh := make(chan int)
-	// time.Sleep(2 * time.Second)
 	go fibonachi(intCh)
 	go scan_gor(intCh)
-	// go scan_gor(intCh)
-	// go scan_gor(intCh)
-	// go scan_gor(intCh)
 
 	time.Sleep(1 * time.Second)
 }

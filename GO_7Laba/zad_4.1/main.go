@@ -62,3 +62,5 @@ func postData() {
 
 //		go run GO_7Laba/zad_4.1/main.go
 //		go run zad_4.1/main.go
+
+//		go run zad_6/main.go

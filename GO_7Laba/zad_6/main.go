@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
+	// "github.com/gorilla/websocket"
 )
 
 // Создаем структуру для хранения информации о клиенте
@@ -89,4 +90,8 @@ func main() {
 //				go mod init github.com/gorilla/websocket
 //				go get github.com/gorilla/websocket
 //				go get -u github.com/gorilla/websocket
+
 //		go run main.go
+//		go run GO_7Laba/zad_6/main.go
+//		go clean -modcache
+//		go mod tidy

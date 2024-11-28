@@ -63,7 +63,6 @@ func main() {
 	go sendRequest("-", 10, 4)
 	go sendRequest("*", 6, 7)
 	go sendRequest("/", 8, 2)
-	go sendRequest("/", 8, 0) // Пример деления на ноль
 
 	// Пауза для завершения всех запросов
 	time.Sleep(time.Second)

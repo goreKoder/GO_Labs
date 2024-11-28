@@ -9,10 +9,10 @@ import (
 func main() {
 	fmt.Println(1)
 
-	go Factorial(1)
-	go sum(1)
+	go Factorial(3)
+	go sum(7)
 	go random(4)
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 }
 
 func Factorial(a int) {
