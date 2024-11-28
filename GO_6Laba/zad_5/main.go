@@ -1,68 +1,72 @@
-package main //          go run GO_6Laba/zad_5/main.go
+package main
 
 import (
 	"fmt"
+	"time"
 )
 
-// Определяем структуру запроса
-type Request struct {
-	Operation string
-	Num1      float64
-	Num2      float64
-	Result    chan float64
+// Структура для запроса
+type CalcRequest struct {
+	Operation string       // Операция: "+", "-", "*", "/"
+	Operand1  float64      // Первый операнд
+	Operand2  float64      // Второй операнд
+	Result    chan float64 // Канал для результата
 }
 
-func calculator(req Request) {
-	var result float64
-	switch req.Operation {
-	case "+":
-		result = req.Num1 + req.Num2
-	case "-":
-		result = req.Num1 - req.Num2
-	case "*":
-		result = req.Num1 * req.Num2
-	case "/":
-		if req.Num2 != 0 {
-			result = req.Num1 / req.Num2
-		} else {
-			fmt.Println("Ошибка: деление на ноль")
+// Серверная часть калькулятора
+func calculator(requests chan CalcRequest) {
+	for req := range requests {
+		var result float64
+
+		// Выполняем операцию
+		switch req.Operation {
+		case "+":
+			result = req.Operand1 + req.Operand2
+		case "-":
+			result = req.Operand1 - req.Operand2
+		case "*":
+			result = req.Operand1 * req.Operand2
+		case "/":
+			if req.Operand2 != 0 {
+				result = req.Operand1 / req.Operand2
+			} else {
+				fmt.Println("Ошибка: деление на ноль")
+				result = 0
+			}
+		default:
+			fmt.Printf("Ошибка: неизвестная операция %s\n", req.Operation)
 			result = 0
 		}
-	default:
-		fmt.Println("Ошибка: неизвестная операция")
-		result = 0
+
+		// Отправляем результат обратно клиенту
+		req.Result <- result
 	}
-	req.Result <- result // Отправляем результат в канал
 }
 
 func main() {
-	requestChannel := make(chan Request)
+	// Канал для запросов
+	requests := make(chan CalcRequest)
 
-	// Запускаем горутину для обработки запросов
-	go func() {
-		for req := range requestChannel {
-			go calculator(req) // Запускаем калькулятор в отдельной горутине
-		}
-	}()
+	// Запуск калькулятора
+	go calculator(requests)
 
-	// Пример запросов
-	for i := 0; i < 5; i++ {
-		resultChannel := make(chan float64)
-		req := Request{
-			Operation: "*",
-			Num1:      float64(i),
-			Num2:      float64(i + 1),
-			Result:    resultChannel,
-		}
-		requestChannel <- req // Отправляем запрос на выполнение операции
-
-		// Получаем результат
-		result := <-resultChannel
-		fmt.Printf("Результат %d %s %d = %f\n", i, req.Operation, i+1, result)
+	// Функция для отправки запросов
+	sendRequest := func(op string, op1, op2 float64) {
+		resultChan := make(chan float64)
+		requests <- CalcRequest{Operation: op, Operand1: op1, Operand2: op2, Result: resultChan}
+		result := <-resultChan
+		fmt.Printf("Результат: %.2f %s %.2f = %.2f\n", op1, op, op2, result)
 	}
 
-	// Закрываем канал запросов
-	close(requestChannel)
+	// Отправляем запросы от клиентов
+	go sendRequest("+", 5, 3)
+	go sendRequest("-", 10, 4)
+	go sendRequest("*", 6, 7)
+	go sendRequest("/", 8, 2)
+	go sendRequest("/", 8, 0) // Пример деления на ноль
+
+	// Пауза для завершения всех запросов
+	time.Sleep(time.Second)
 }
 
 //          go run GO_6Laba/zad_5/main.go

@@ -12,8 +12,7 @@ func main() {
 	go Factorial(1)
 	go sum(1)
 	go random(4)
-	fmt.Println(3)
-	time.Sleep(8 * time.Second)
+	time.Sleep(2 * time.Second)
 }
 
 func Factorial(a int) {
