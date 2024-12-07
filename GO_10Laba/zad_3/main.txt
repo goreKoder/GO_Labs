@@ -1,0 +1,140 @@
+package main
+
+import (
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/pem"
+	"fmt"
+	"io/ioutil"
+	"log"
+)
+
+func generateKeyPair(bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
+	if err != nil {
+		return nil, nil, err
+	}
+	publicKey := &privateKey.PublicKey
+	return privateKey, publicKey, nil
+}
+
+func saveKeyToFile(key *rsa.PrivateKey, filename string) error {
+	keyBytes := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: x509.MarshalPKCS1PrivateKey(key),
+	})
+	return ioutil.WriteFile(filename, keyBytes, 0600)
+}
+
+func savePublicKeyToFile(key *rsa.PublicKey, filename string) error {
+	keyBytes, err := x509.MarshalPKIXPublicKey(key)
+	if err != nil {
+		return err
+	}
+	keyPem := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PUBLIC KEY",
+		Bytes: keyBytes,
+	})
+	return ioutil.WriteFile(filename, keyPem, 0600)
+}
+
+func loadPrivateKeyFromFile(filename string) (*rsa.PrivateKey, error) {
+	keyBytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	block, _ := pem.Decode(keyBytes)
+	if block == nil {
+		return nil, fmt.Errorf("failed to decode PEM block containing the key")
+	}
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	return privateKey, nil
+}
+
+func loadPublicKeyFromFile(filename string) (*rsa.PublicKey, error) {
+	keyBytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	block, _ := pem.Decode(keyBytes)
+	if block == nil {
+		return nil, fmt.Errorf("failed to decode PEM block containing the key")
+	}
+
+	publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	publicKey, ok := publicKeyInterface.(*rsa.PublicKey)
+	if !ok {
+		return nil, fmt.Errorf("failed to cast public key to rsa.PublicKey")
+	}
+	return publicKey, nil
+}
+
+func signMessage(privateKey *rsa.PrivateKey, message []byte) ([]byte, error) {
+	hashed := sha256.Sum256(message)
+	signature, err := privateKey.Sign(rand.Reader, hashed[:], crypto.SHA256)
+	if err != nil {
+		return nil, err
+	}
+	return signature, nil
+}
+
+func verifySignature(publicKey *rsa.PublicKey, message []byte, signature []byte) error {
+	hashed := sha256.Sum256(message)
+	err := publicKey.Verify(hashed[:], signature, crypto.SHA256)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func main() {
+	// 1. Генерация ключей
+	privateKey, publicKey, err := generateKeyPair(2048)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 2. Сохранение ключей
+	err = saveKeyToFile(privateKey, "private_key.pem")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = savePublicKeyToFile(publicKey, "public_key.pem")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 3. Подписание сообщения (сторона А)
+	message := []byte("Это секретное сообщение!")
+	signature, err := signMessage(privateKey, message)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 4. Передача сообщения и подписи (сторона А -> сторона Б)
+	fmt.Println("Подписанное сообщение передано стороне Б:")
+	fmt.Printf("Сообщение: %s\n", message)
+	fmt.Printf("Подпись: %x\n", signature)
+
+	// 5. Проверка подписи (сторона Б)
+	publicKeyB, err := loadPublicKeyFromFile("public_key.pem")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = verifySignature(publicKeyB, message, signature)
+	if err != nil {
+		fmt.Println("Ошибка проверки подписи:", err)
+	} else {
+		fmt.Println("Подпись верна!")
+	}
+}
