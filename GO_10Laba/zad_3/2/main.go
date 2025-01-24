@@ -17,7 +17,7 @@ func loadPrivateKeyFromFile(filename string) (*rsa.PrivateKey, error) {
 	}
 	block, _ := pem.Decode(privPEM)
 	if block == nil || block.Type != "PRIVATE KEY" {
-		return nil, fmt.Errorf("failed to decode PEM block containing private key")
+		return nil, fmt.Errorf("не удалось расшифровать блок PEM, содержащий закрытый ключ")
 	}
 	return x509.ParsePKCS1PrivateKey(block.Bytes)
 }
@@ -29,7 +29,7 @@ func loadPublicKeyFromFile(filename string) (*rsa.PublicKey, error) {
 	}
 	block, _ := pem.Decode(pubPEM)
 	if block == nil || block.Type != "PUBLIC KEY" {
-		return nil, fmt.Errorf("failed to decode PEM block containing public key")
+		return nil, fmt.Errorf("не удалось расшифровать блок PEM, содержащий открытый ключ")
 	}
 	pub, err := x509.ParsePKCS1PublicKey(block.Bytes)
 	if err != nil {
@@ -47,29 +47,29 @@ func verifySignature(pub *rsa.PublicKey, message, signature []byte) error {
 }
 
 func main() {
-	message := []byte("Hello, this is a signed message!")
+	message := []byte("Здравствуйте, это подписанное сообщение!")
 
 	privKey, err := loadPrivateKeyFromFile("private_key.pem")
 	if err != nil {
-		log.Fatalf("Error loading private key: %v", err)
+		log.Fatalf("Ошибка при загрузке закрытого ключа: %v", err)
 	}
 
 	signature, err := signMessage(privKey, message)
 	if err != nil {
-		log.Fatalf("Error signing message: %v", err)
+		log.Fatalf("Сообщение об ошибке при подписании: %v", err)
 	}
 
 	pubKey, err := loadPublicKeyFromFile("public_key.pem")
 	if err != nil {
-		log.Fatalf("Error loading public key: %v", err)
+		log.Fatalf("Ошибка при загрузке открытого ключа: %v", err)
 	}
 
 	err = verifySignature(pubKey, message, signature)
 	if err != nil {
-		log.Fatalf("Signature verification failed: %v", err)
+		log.Fatalf("Не удалось подтвердить подпись: %v", err)
 	}
 
-	fmt.Println("Signature verified successfully!")
+	fmt.Println("Подпись успешно подтверждена!")
 }
 
 //			go run GO_10Laba/zad_3/2/main.go

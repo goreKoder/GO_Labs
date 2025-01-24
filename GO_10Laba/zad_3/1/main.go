@@ -49,20 +49,20 @@ func savePublicKeyToFile(filename string, pub *rsa.PublicKey) error {
 func main() {
 	privateKey, err := generateKeyPair(2048)
 	if err != nil {
-		log.Fatalf("Error generating key pair: %v", err)
+		log.Fatalf("Ошибка при генерации пары ключей: %v", err)
 	}
 
 	err = savePrivateKeyToFile("private_key.pem", privateKey)
 	if err != nil {
-		log.Fatalf("Error saving private key: %v", err)
+		log.Fatalf("Ошибка при сохранении закрытого ключа: %v", err)
 	}
 
 	err = savePublicKeyToFile("public_key.pem", &privateKey.PublicKey)
 	if err != nil {
-		log.Fatalf("Error saving public key: %v", err)
+		log.Fatalf("Ошибка при сохранении открытого ключа: %v", err)
 	}
 
-	fmt.Println("Keys generated and saved to files.")
+	fmt.Println("Сгенерированные и сохраненные в файлах ключи.")
 }
 
 //		go run GO_10Laba/zad_3/1/main.go
